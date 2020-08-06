@@ -18,7 +18,7 @@
                 <label for="content">content</label>
                 <textarea name="" id="" cols="30" rows="10" style="resize:none;" v-model="boardData.content"></textarea>
             </div>
-            <button @click.native="createBoard">submit</button>
+            <button @click="createBoard">submit</button>
         </form>
     </div>
   </b-modal>
@@ -50,9 +50,8 @@ export default {
     methods: {
         createBoard(){
             this.boardData.uid = this.curUid
-            axios.post(`${API_URL}/api/board/create`, this.boardData)
+            axios.post(`${API_URL}api/board/create/`, this.boardData)
             .then(res=>{
-                console.log(res)
                 this.$router.push('/')
             })
             .catch(err=> {

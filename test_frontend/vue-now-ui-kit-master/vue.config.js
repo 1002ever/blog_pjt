@@ -5,7 +5,12 @@ module.exports = {
           target: 'http://localhost:3000',
           ws:true,
           changeOrigin:true
-        }
+        },
+        '/board': {
+          target: 'http://localhost:3000',
+          ws:true,
+          changeOrigin:true
+        }     
       }
   },
   runtimeCompiler: true,

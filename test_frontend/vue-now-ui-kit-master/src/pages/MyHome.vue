@@ -13,11 +13,9 @@
         </div>
       </div>
     </div>
-   
- 
-    
   </div>
 </template>
+
 <script>
 import { Button, FormGroupInput } from '@/components';
 export default {

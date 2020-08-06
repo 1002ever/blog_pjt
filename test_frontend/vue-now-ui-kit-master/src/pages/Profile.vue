@@ -28,11 +28,11 @@
       <div class="container">
         <div class="button-container">
           <ProfileUpdate :userData="userData"/>
-          <b-button v-if="isMyPage" class="btn btn-primary btn-round btn-lg">비밀번호 변경</b-button>
+          <DesUpdate :userData="userData"/>
         </div>
         <h3 class="title">About me</h3>
         <h5 class="description">
-          내 소개를 입력하세요.
+          {{description}}
         </h5>
         <div class="row">
           <div class="col-md-6 ml-auto mr-auto">
@@ -106,6 +106,7 @@ import { Tabs, TabPane } from '@/components';
 import axios from 'axios'
 import { sync } from 'vuex-pathify'
 import ProfileUpdate from '@/pages/ProfileUpdate.vue'
+import DesUpdate from '@/pages/DesUpdate.vue'
 
 // 1 ~ 5까지 랜덤 수
 var rand2 = Math.floor(Math.random()*5) + 1
@@ -119,6 +120,7 @@ export default {
     return {
       imgPath: "img/random_profile/default_profile.jpg",
       userData: "",
+      description: "내 소개를 입력해주세요",
       isMyPage: false,
     }
   },
@@ -126,6 +128,7 @@ export default {
     Tabs,
     TabPane,
     ProfileUpdate,
+    DesUpdate,
   },
   methods: {
     isMine(a, b) {
@@ -145,12 +148,14 @@ export default {
     axios.post(url, postInfo)
     .then(res => {
       this.userData = res.data
-      console.log(this.userData)
+      
       if (this.userData.img !== "") {
         this.imgPath = userData.img
       }
+      if (this.userData.description !== "") {
+        this.description = this.userData.description
+      }
       this.isMyPage = this.isMine(this.curUid, this.userData.uid)
-      console.log(this.isMyPage)
     })
     .catch(() => {
       alert("프로필에 접근 권한이 없습니다.")

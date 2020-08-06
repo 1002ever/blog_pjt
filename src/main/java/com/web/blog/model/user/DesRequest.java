@@ -8,12 +8,20 @@ import lombok.ToString;
 
 @Valid
 @ToString
-public class UserInfoRequest {
+public class DesRequest {
     @ApiModelProperty(required = true)
     @NotNull
     String uid;
 
+    @ApiModelProperty(required = true)
+    @NotNull
+    String description;
+
     public String getUid() {
         return uid;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

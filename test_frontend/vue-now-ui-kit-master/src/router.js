@@ -32,7 +32,7 @@ export default new Router({
     {
       path: '/myhome',
       name: 'myhome',
-      components: { default: MyHome, header: MainNavbar  },
+      components: { default: MyHome, header: MainNavbar },
       props: {
         header: { colorOnScroll: 400 },
         footer: { backgroundColor: 'black' }
@@ -41,9 +41,9 @@ export default new Router({
     {
       path: '/myboard',
       name: 'myboard',
-      components: { default: MyBoard, header: MainNavbar  },
+      components: { default: MyBoard, header: MainNavbar },
       props: {
-        header: { colocOnScroll: 400},
+        header: { colorOnScroll: 400 },
         footer: { backgroundColor: 'black' }
       }
     },

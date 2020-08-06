@@ -12,6 +12,7 @@ import com.web.blog.dao.user.UserDao;
 import com.web.blog.model.BasicResponse;
 import com.web.blog.model.user.SignupRequest;
 import com.web.blog.model.user.UserInfoRequest;
+import com.web.blog.model.user.DesRequest;
 import com.web.blog.model.user.User;
 import org.springframework.web.bind.annotation.RestController;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -213,6 +214,27 @@ public class AccountController {
         return response = new ResponseEntity<>(result, HttpStatus.OK);
 
     }
+
+    //내 소개 수정
+    @PutMapping("/account/update/description")
+    @ApiOperation(value = "소개 수정하기")
+    public Object desUpdate(@Valid @RequestBody DesRequest request)throws IOException, MessagingException {
+
+        String uid = request.getUid();
+        String description = request.getDescription();
+
+        User user = userDao.findUserByUid(uid);
+        user.setDescription(description);
+        userDao.save(user);
+        
+        final BasicResponse result = new BasicResponse();
+        result.status = true;
+        result.data = "success";
+
+        ResponseEntity response = null;
+        return response = new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
     @GetMapping("/account/email")
     @ApiOperation(value = "이메일인증")
     public String sendMail(String email)throws MessagingException, IOException {

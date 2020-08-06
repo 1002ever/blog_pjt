@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class User {
     @Id private String uid;
 
-    @JsonIgnore private String password;
+    private String password;
     private String email;
     private String name;
     private String phone;

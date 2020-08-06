@@ -21,7 +21,7 @@ export default {
                 console.log(data);
                 this.curUid = ''
                 console.log('logout success')
-                this.$router.push('/')
+                location.reload()
             })
 
             .catch(() => {

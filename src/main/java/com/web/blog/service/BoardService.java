@@ -1,6 +1,7 @@
 package com.web.blog.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.web.blog.dao.board.BoardDao;
 import com.web.blog.model.board.Board;
@@ -23,7 +24,7 @@ public class BoardService {
         return boardDao.getBoardByBoardno(boardno);
     }
 
-    public boolean deleteBoard(int boardno) {
+    public Optional<Board> deleteBoard(int boardno) {
         return boardDao.deleteByBoardno(boardno);
     }
 

@@ -1,6 +1,7 @@
 package com.web.blog.controller.board;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.web.blog.model.BasicResponse;
 import com.web.blog.model.board.Board;
@@ -87,16 +88,19 @@ public class BoardController {
     @ApiOperation(value = "특정 게시글을 삭제한다.", response = Board.class)
     @DeleteMapping("/{boardno}")
     public ResponseEntity<Board> deleteBoard(@PathVariable int boardno) throws Exception {
-        boolean isDeleted = boardService.deleteBoard(boardno);
+        System.out.println("Delete board" + boardno + " in--------------------------");
 
-        if(!isDeleted)
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        Optional<Board> isDeleted = boardService.deleteBoard(boardno);
+        System.out.println("delete board ......");
 
-        return new ResponseEntity(HttpStatus.OK);
+        if(!isDeleted.isEmpty())
+            return new ResponseEntity(HttpStatus.OK);
+
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
     
     @ApiOperation(value = "새로운 게시글을 생성한다.", response = String.class)
-    @PostMapping("create")
+    @PostMapping("/create")
     public ResponseEntity<String> createBoard(@RequestBody Board board) throws Exception {
         System.out.println("in");
 		if (boardService.createBoard(board) != null) {

@@ -37,35 +37,11 @@
               </div>
             </div>
             <div class="col-md-10">
-              <MainBoard/>
-              <!-- <MainBoard v-for="board in boards" :key="board.boardno" :board="board"/> -->
-              <button @click="getBoardList">가져오기</button>
+              <MainBoard v-for="board in boards" :key="board.boardno" :board="board"/>
             </div>
           </div>
         </div>
       </div>
-    <div class="container">
-      <b-row>
-    <b-col sm="2">
-      <label for="textarea-auto-height">Auto height:</label>
-    </b-col>
-    <b-col sm="10">
-      <b-form-textarea
-        id="textarea-auto-height"
-        placeholder="Auto height textarea"
-        rows="3"
-        max-rows="8"
-      ></b-form-textarea>
-    </b-col>
-  </b-row>
-
-    </div>
-
-
-
-
-
-
     </div>
     <basic-elements></basic-elements>
     <navigation></navigation>
@@ -153,14 +129,18 @@ export default {
   },
   methods: {
     getBoardList() {
-      axios.get(`${API_URL}/api/board/listAll`)
+      axios.get(`${API_URL}api/board/listAll/`)
       .then(res => {
-        console.log(res)
-        // 어디에 담겨있는지 확인할것 일단은 그냥 res.data에 있는 것으로 함. 
         this.boards = res.data
       })
+      .catch(err => {
+        console.log(err)
+      })
     }
-  }
+  },
+  created() {
+    this.getBoardList()
+  },
 };
 </script>
 <style></style>

@@ -16,20 +16,17 @@ import MyPicture from '@/pages/myblog/MyPicture.vue';
 import Article from '@/pages/myblog/Article.vue';
 import { Button, FormGroupInput } from '@/components';
 
-
 export default {
   name: 'myboard',
   bodyClass: 'myboard-page',
   components: {
+    [Button.name]: Button,
+    [FormGroupInput.name]: FormGroupInput,
     MyPicture,
     MyCheckbox,
     MyInput,
     Article,
   },
-  data() {
-
-  }
-
 }
 </script>
 

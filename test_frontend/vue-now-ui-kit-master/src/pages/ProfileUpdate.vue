@@ -1,7 +1,7 @@
 <template>
     <div class="d-inline">
 
-        <b-button class="btn btn-primary btn-round btn-lg" v-b-modal.modal-prevent-closing>내 정보 수정</b-button>
+        <b-button class="btn btn-primary btn-round btn-lg" v-b-modal.modal-prevent-closing>내 정보 관리</b-button>
 
         <b-modal
         id="modal-prevent-closing"
@@ -122,7 +122,9 @@ export default {
                 this.$bvModal.hide('modal-prevent-closing')
                 })
                 console.log('profile_update_success')
-                this.$router.push('/profile')
+                location.reload()
+                alert('내 정보가 수정되었습니다')
+
             })
             .catch(() => {
                 alert('회원정보 수정 권한이 없습니다.')
