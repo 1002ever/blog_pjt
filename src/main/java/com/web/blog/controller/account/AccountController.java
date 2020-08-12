@@ -19,6 +19,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -122,18 +123,29 @@ public class AccountController {
         String description = request.getDescription();
         if (description == null) {
             description = "";
-        } 
-        
+        }
+
         String img = request.getImg();
         if (img == null) {
             img = "";
         }
 
-        Optional<User> userOpt = userDao.findByEmailOrUid(email, uid);
+        Optional<User> userOptByUid = userDao.findByUid(uid);
+        Optional<User> userOptByEmail = userDao.findByEmail(email);
 
-        if (!userOpt.isPresent()) {
+        if (!userOptByUid.isPresent() && !userOptByEmail.isPresent()) {
 
-            User user = new User(uid, password, email, name, phone, interest1, interest2, description, img);
+            User user = new User(
+                uid,
+                password,
+                email,
+                name,
+                phone,
+                interest1,
+                interest2,
+                description,
+                img
+            );
 
             User insertResult = userDao.save(user);
 
@@ -147,7 +159,25 @@ public class AccountController {
 
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            if (userOptByUid.isPresent()) {
+
+                final BasicResponse result = new BasicResponse();
+                result.status = false;
+                result.data = "Uid";
+                response = new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+            } else if (userOptByEmail.isPresent()) {
+
+                final BasicResponse result = new BasicResponse();
+                result.status = false;
+                result.data = "Email";
+                response = new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+            } else {
+
+                final BasicResponse result = new BasicResponse();
+                result.status = false;
+                result.data = "Uid&Email";
+                response = new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+            }
         }
         return response;
     }
@@ -155,18 +185,17 @@ public class AccountController {
     // 유저 정보 반환
     @PostMapping("/account/userinfo")
     @ApiOperation(value = "유저 정보 반환하기")
-    public Object userinfo(@Valid @RequestBody UserInfoRequest request) throws IOException, MessagingException {
+    public Object userinfo(@Valid @RequestBody UserInfoRequest request)throws IOException, MessagingException {
         String uid = request.getUid();
         User user = userDao.findUserByUid(uid);
-        
-        if(user == null)
+
+        if (user == null) 
             return new ResponseEntity<User>(user, HttpStatus.BAD_REQUEST);
-        else
-            return new ResponseEntity<User>(user,HttpStatus.OK);
+        else 
+            return new ResponseEntity<User>(user, HttpStatus.OK);
 
-    }
-
-
+        }
+    
     //탈퇴하기
     @DeleteMapping("/account/delete")
     @ApiOperation(value = " 탈퇴하기")
@@ -181,8 +210,7 @@ public class AccountController {
         result.status = true;
         result.data = "success";
 
-        ResponseEntity response = null;
-        return response = new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
     //데이터 수정
@@ -200,18 +228,27 @@ public class AccountController {
         String description = request.getDescription();
         String img = request.getImg();
 
-        User user = new User(uid, password, email, name, phone, interest1, interest2, description, img);
+        User user = new User(
+            uid,
+            password,
+            email,
+            name,
+            phone,
+            interest1,
+            interest2,
+            description,
+            img
+        );
         userDao.save(user);
 
-        // 화면에 표시할 유저 정보. 
+        // 화면에 표시할 유저 정보.
         User userData = userDao.findUserByEmail(email);
-        
+
         final BasicResponse result = new BasicResponse();
         result.status = true;
         result.data = "success";
 
-        ResponseEntity response = null;
-        return response = new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
 
@@ -226,19 +263,18 @@ public class AccountController {
         User user = userDao.findUserByUid(uid);
         user.setDescription(description);
         userDao.save(user);
-        
+
         final BasicResponse result = new BasicResponse();
         result.status = true;
         result.data = "success";
 
-        ResponseEntity response = null;
-        return response = new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/account/email")
+    @GetMapping("/account/email_auth")
     @ApiOperation(value = "이메일인증")
-    public String sendMail(String email)throws MessagingException, IOException {
-        String sendTo = "wlsgid2378@naver.com"; //= email;//보내려는 이메일 주소 작성
+    public Object sendMail(@RequestParam(required = true)final String email)throws MessagingException, IOException {
+        String sendTo = email; //= email;//보내려는 이메일 주소 작성
         String mailTitle = "인증이다";
         int randomNum = (int)(Math.random() * (9999 - 1000)) + 1000;
         String mailContent = "인증번호 : " + Integer.toString(randomNum);
@@ -253,7 +289,13 @@ public class AccountController {
         helper.setTo(sendTo);
         helper.setText(mailContent, true);
         helper.setFrom("tt");
+
         javaMailSender.send(message);
-        return Integer.toString(randomNum);
+
+        final BasicResponse result = new BasicResponse();
+        result.status = true;
+        result.data = Integer.toString(randomNum);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

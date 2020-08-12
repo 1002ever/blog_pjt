@@ -1,156 +1,59 @@
 package com.web.blog.model.introduction;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+import javax.annotation.Generated;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
+@ToString
+@Getter @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Introduction {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private int introno;
-    private String uid;
-    private String company;
-    private Date startdate;
-    private Date enddate;
-    private int subjectno;
-    private String subject;
-    private String contents;
+    
+    @NonNull String uid;
+    @NonNull private String company;
+     private Date startdate;
+     private Date enddate;
+    @NonNull private int subjectno;
+    @NonNull private String subject;
+    @NonNull private String contents;
     private int limitlength;
 
-    // N:M을 위한 어노테이션
-    @ManyToMany
-    @JoinTable(name = "introduction_hashtag", 
-        joinColumns = @JoinColumn(name="introduction_introno"),
-        inverseJoinColumns = @JoinColumn(name = "hashtag_tagno")
-    )
+    @JsonIgnore
+    @OneToMany(mappedBy = "introduction", cascade = CascadeType.ALL)
+    private List<Tagging> taggings = new ArrayList<>();
+    
+    public void addTagging(Tagging taggings){
+        this.taggings.add(taggings);
+    }
 
-public String getUid() {
-    return uid;
-}
-
-public void setUid(String uid) {
-    this.uid = uid;
-}
-
-public String getCompany() {
-    return company;
-}
-
-public void setCompany(String company) {
-    this.company = company;
-}
-
-public Date getStartdate() {
-    return startdate;
-}
-
-public void setStartdate(Date startdate) {
-    this.startdate = startdate;
-}
-
-public Date getEnddate() {
-    return enddate;
-}
-
-public void setEnddate(Date enddate) {
-    this.enddate = enddate;
-}
-
-public String getSubject() {
-    return subject;
-}
-
-public void setSubject(String subject) {
-    this.subject = subject;
-}
-
-public String getContents() {
-    return contents;
-}
-
-public void setContents(String contents) {
-    this.contents = contents;
-}
-
-public int getLimitlength() {
-    return limitlength;
-}
-
-public void setLimitlength(int limitlength) {
-    this.limitlength = limitlength;
-}
-
-public int getIntrono() {
-    return introno;
-}
-
-public void setIntrono(int introno) {
-    this.introno = introno;
-}
-
-public int getSubjectno() {
-    return subjectno;
-}
-
-public void setSubjectno(int subjectno) {
-    this.subjectno = subjectno;
-}
-
-public Introduction(){};
-
-@Builder
-public Introduction(String uid, String company,Date startdate,Date enddate,
-int subjectno,String subject,String contents,int limitlength){
-    this.uid = uid;
-    this.company = company;
-    this.startdate = startdate;
-    this.enddate = enddate;
-    this.subjectno = subjectno;
-    this.subject = subject;
-    this.contents = contents;
-    this.limitlength = limitlength;
-
-
-}
-@Builder
-public Introduction(int introno,String uid, String company,Date startdate,Date enddate,
-int subjectno,String subject,String contents,int limitlength){
-    this.introno = introno;
-    this.uid = uid;
-    this.company = company;
-    this.startdate = startdate;
-    this.enddate = enddate;
-    this.subjectno = subjectno;
-    this.subject = subject;
-    this.contents = contents;
-    this.limitlength = limitlength;
-
-
-}
-
-@Override
-public String toString() {
-    return "Introduction [company=" + company + ", contents=" + contents + ", enddate=" + enddate + ", introno="
-            + introno + ", limitlength=" + limitlength + ", startdate=" + startdate + ", subject=" + subject
-            + ", subjectno=" + subjectno + ", uid=" + uid + "]";
-}
-
-
+    public void removeTaggings(Tagging taggings){
+        this.taggings.remove(taggings);
+    }
 }

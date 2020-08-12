@@ -31,7 +31,7 @@
       </li>
 
       <li class="nav-item" v-if="curUid">
-        <nav-link class="nav-link" to="/myboard">
+        <nav-link class="nav-link" to="/introduction">
           <p class="text-white">자소서</p>
         </nav-link>
       </li>

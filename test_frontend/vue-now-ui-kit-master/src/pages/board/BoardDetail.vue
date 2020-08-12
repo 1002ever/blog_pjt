@@ -21,14 +21,16 @@
             </div>
             <div class="container">
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-md-8">
                         <p class="d-inline text-muted">{{boardData.uid}}</p>
                         <p class="d-inline text-muted ml-2">{{boardData.date}}</p>
                     </div>
-                    <div class="col-sm-3 col-lg-3 d-flex justify-content-end">
-                        <n-button type="primary" class="mt-0 mb-0 mr-2" round @click="BoardDelete">수정</n-button>
-                        <n-button type="primary" class="mt-0 mb-0" round @click="BoardDelete">삭제</n-button>
+                        <!-- <n-button type="primary" class="mt-0 mb-0 mr-2" round @click="BoardUpdate">수정</n-button> -->
+                        <div class="col-md-4 d-flex justify-content-end">
+                            <BoardUpdate class="d-inline-block" :boardData="boardData"/>
+                            <n-button type="primary" class="mt-0 mb-0 d-inline-block" round @click="BoardDelete" v-if="curUid===boardData.uid">삭제</n-button>
                         </div>
+                        <!-- <b-button type="primary" class="d-inline-block col-md-2 mt-0 mb-0 btn-primary btn-round" round @click="BoardDelete">삭제</b-button> -->
                     <hr>
                 </div>  
             </div>
@@ -65,8 +67,10 @@
 <script>
 import axios from 'axios'
 const API_URL = 'http://localhost:8080/'
+import { sync } from 'vuex-pathify'
 
-import Button from '@/pages/board/comment/Button.vue'
+import Button from '@/pages/board/Button.vue'
+import BoardUpdate from '@/pages/board/BoardUpdate.vue'
 import commentList from '@/pages/board/comment/commentList.vue'
 import commentInput from '@/pages/board/comment/commentInput.vue'
 
@@ -79,7 +83,7 @@ export default {
         }
     },
     methods: {
-        getBoardData(){
+        getBoardData() {
             const boardno = this.$route.params.boardno
             axios.get(`${API_URL}api/board/boardno/${boardno}/`)
             .then(res=>{
@@ -89,28 +93,29 @@ export default {
                 console.log(err)
             })
         },
-        BoardDelete (){
+        BoardDelete() {
             const boardno = this.$route.params.boardno
             axios.delete(`${API_URL}api/board/${boardno}/`)
             .then(res => {
-                console.log(res)
-                console.log(`${API_URL}api/board/${boardno}/`)
-                this.$route.push('/')
+                this.$router.push({name:'index'})
             })
             .catch(err => {
                 console.log(err)
             })
-        }
+        },
     },
     created() {
         this.getBoardData()
     },
+    computed: {
+        curUid: sync('curUid')
+    },
     components: {
+        BoardUpdate,
         commentList,
         commentInput,
         [Button.name]: Button,
     },
-
 
 }
 </script>

@@ -2,11 +2,11 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Index from './pages/Index.vue';
 import MyHome from './pages/MyHome.vue';
-import Login from './pages/Login.vue';
 import Profile from './pages/Profile.vue';
 import MainNavbar from './layout/MainNavbar.vue';
 import MainFooter from './layout/MainFooter.vue';
 import MyBoard from './pages/MyBoard.vue';
+import MyIntroduction from './pages/myblog/MyIntroduction.vue';
 import BoardDetail from './pages/board/BoardDetail.vue';
 import MyIntroductionDetail from './pages/myblog/MyIntroductionDetail.vue';
 
@@ -48,11 +48,12 @@ export default new Router({
       }
     },
     {
-      path: '/login',
-      name: 'login',
-      components: { default: Login, header: MainNavbar },
+      path: '/introduction',
+      name: 'introduction',
+      components: { default: MyIntroduction, header: MainNavbar, footer: MainFooter },
       props: {
-        header: { colorOnScroll: 400 }
+        header: { colorOnScroll: 400 },
+        footer: { backgroundColor: 'black' }
       }
     },
     {
@@ -73,8 +74,7 @@ export default new Router({
       }
     },
     {
-      path: '/board/boardno',
-      // path: '/board/:id' 추후에 이걸로 수정필요,
+      path: '/board/:boardno',
       name: 'BoardDetail',
       components: { default: BoardDetail, header: MainNavbar, footer: MainFooter},
       props: {

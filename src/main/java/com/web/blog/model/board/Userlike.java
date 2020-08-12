@@ -1,6 +1,8 @@
 package com.web.blog.model.board;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import lombok.AllArgsConstructor;
@@ -16,17 +18,8 @@ import lombok.ToString;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//@JsonInclude(JsonInclude.Include.NON_NULL)
-public class Board {
-    @Id
+public class Userlike {
+    @Id int likeno;
     int boardno;
     String uid;
-    String subject;
-    int likes;
-    String content;
-    String interest;
-    String picture;
-    
-    String createdat;
-    String updatedat;
 }

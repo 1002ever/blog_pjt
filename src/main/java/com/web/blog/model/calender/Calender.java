@@ -10,25 +10,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Calender {
     @Id
     int calenderno;
-    
+
     @JsonIgnore
-    String uid;
-    String title;
-    String content;
-    Date startdate;
-    Date enddate;
+    @NonNull String uid;
+    @NonNull String title;
+    @NonNull String content;
+    @NonNull Date startdate;
+    @NonNull Date enddate;
 
     public int getCalenderno() {
         return calenderno;
@@ -76,26 +78,5 @@ public class Calender {
 
     public void setEnddate(Date enddate) {
         this.enddate = enddate;
-    }
-    @Builder
-    public Calender(){}
-    @Builder
-    public Calender(String uid,String title, String content, Date startdate,Date enddate){
-        this.uid = uid;
-        this.title = title;
-        this.content = content;
-        this.startdate = startdate;
-        this.enddate = enddate;
-        
-    }
-    @Builder
-    public Calender(int calenderno,String uid,String title, String content, Date startdate,Date enddate){
-        this.calenderno = calenderno;
-        this.uid = uid;
-        this.title = title;
-        this.content = content;
-        this.startdate = startdate;
-        this.enddate = enddate;
-        
     }
 }

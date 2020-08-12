@@ -1,11 +1,9 @@
 <template>
   <div>
-    <div class="page-header page-header-small">
-      <MyPicture/>
-      <MyInput class="container"/>
-      <MyCheckbox/>
-      <Article/>
-    </div>
+    <MyPicture/>
+    <MyInput class="container"/>
+    <MyCheckbox/>
+    <Article/>
   </div>
 </template>
 

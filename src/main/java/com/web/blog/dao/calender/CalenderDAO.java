@@ -27,5 +27,6 @@ public interface CalenderDAO extends JpaRepository<Calender, Integer> {
 
    //d
    public void deleteByCalenderno(int calenderno);
-
+   public void delete(Calender calender);
+   
 }

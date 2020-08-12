@@ -7,6 +7,7 @@ import com.web.blog.model.BasicResponse;
 import com.web.blog.model.board.Board;
 import com.web.blog.service.BoardService;
 
+import org.json.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.models.Response;
 import io.swagger.annotations.ApiOperation;
 
 @ApiResponses(value = { @ApiResponse(code = 401, message = "Unauthorized", response = BasicResponse.class),
@@ -48,7 +50,18 @@ public class BoardController {
         }
 		return new ResponseEntity<List<Board>>(boardService.getListOfBoard(), HttpStatus.OK);
     }
-    
+
+    @ApiOperation(value = "좋아요순으로 게시글의 정보를 반환한다.", response = List.class)
+	@GetMapping("/listOrderByLikes")
+	public ResponseEntity<List<Board>> getListOfBoardOrderByLikes() throws Exception {
+        List<Board> list = boardService.getListOfBoardOrderByLikes();
+
+        for(Board b : list) {
+            System.out.println(b.toString());
+        }
+		return new ResponseEntity<List<Board>>(list, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "특정 게시글의 정보를 반환한다.", response = Board.class)
     @GetMapping("/boardno/{boardno}")
     public ResponseEntity<Board> getBoard(@PathVariable int boardno) throws Exception {
@@ -93,8 +106,8 @@ public class BoardController {
         Optional<Board> isDeleted = boardService.deleteBoard(boardno);
         System.out.println("delete board ......");
 
-        if(!isDeleted.isEmpty())
-            return new ResponseEntity(HttpStatus.OK);
+        if(isDeleted.isEmpty())
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
@@ -102,7 +115,8 @@ public class BoardController {
     @ApiOperation(value = "새로운 게시글을 생성한다.", response = String.class)
     @PostMapping("/create")
     public ResponseEntity<String> createBoard(@RequestBody Board board) throws Exception {
-        System.out.println("in");
+        System.out.println("Board Creaet IN...........");
+        System.out.println(board.toString());
 		if (boardService.createBoard(board) != null) {
 			return new ResponseEntity<String>("success", HttpStatus.OK);
 		}
@@ -138,5 +152,25 @@ public class BoardController {
         return new ResponseEntity<>(board, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "게시글 좋아요")
+    @GetMapping("/like/{boardno}/{uid}")
+    public ResponseEntity<String> boardLike(@PathVariable int boardno, @PathVariable String uid) {
+        System.out.println("게시글 좋아요 클릭......");
+        System.out.println(boardno + " , " + uid);
+        boolean statusCancle = false;
+        try {
+            statusCancle = boardService.clickBoardLike(boardno, uid);
+
+            String msg = "like success";
+            if(statusCancle) {
+                msg = "cancle";
+            }
+    
+            return new ResponseEntity<String>(msg , HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<String>("Fail!!! 해당하는 boardno가 없습니다." , HttpStatus.BAD_REQUEST);
+        }
+    }
    
 }

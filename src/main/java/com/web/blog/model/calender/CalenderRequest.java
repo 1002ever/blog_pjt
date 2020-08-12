@@ -12,8 +12,6 @@ import lombok.ToString;
 @ToString
 public class CalenderRequest {
     @ApiModelProperty(required = true)
-    int calenderno;
-    @ApiModelProperty(required = true)
     @NotNull 
     String uid;
     @ApiModelProperty(required = true)
@@ -29,13 +27,6 @@ public class CalenderRequest {
     @NotNull 
     Date enddate;
 
-    public int getCalenderno() {
-        return calenderno;
-    }
-
-    public void setCalenderno(int calenderno) {
-        this.calenderno = calenderno;
-    }
 
     public String getTitle() {
         return title;

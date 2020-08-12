@@ -74,11 +74,26 @@
                 v-model="userData.email"
                 type="email"
                 required
+                :state="emailAuthChk"
                 placeholder="Enter email"
               ></b-form-input>
+              <b-button @click="emailAuth" v-if="emailCode===''">인증 메일 보내기</b-button>
             </b-form-group>
 
-            
+            <b-form-group
+              label="Email Code"
+              label-for="email-code-input"
+              v-if="!emailAuthChk && emailCode !==''"
+            >
+              <b-form-input
+                id="email-code-input"
+                v-model="emailCodeInput"
+                type="text"
+                placeholder="발송된 4자리 코드를 입력해주세요"
+              ></b-form-input>
+              <b-button @click="emailAuth">인증 메일 재전송</b-button>
+              <b-button @click="codeChk">인증 번호 확인</b-button>
+            </b-form-group>
 
             <b-form-group id="input-group-3" label="관심사1" label-for="inter1-input">
               <b-form-select
@@ -115,6 +130,10 @@ export default {
     name: 'Signup',
     data() {
         return {
+            emailCode: '',
+            emailCodeInput: '',
+            emailAuthChk: false,
+
             userData: {
               email: '',
               uid: '',
@@ -159,6 +178,10 @@ export default {
             this.userData.phone = ''
             this.userData.interest1 = ''
             this.userData.interest2 = ''
+
+            this.emailCode = ''
+            this.emailCodeInput = ''
+            this.emailAuthChk = false
         },
         handleSubmit() {
             // Exit when the form isn't valid
@@ -191,6 +214,11 @@ export default {
               return
             }
 
+            if (!this.emailAuthChk) {
+              alert('이메일 인증이 필요합니다')
+              return
+            }
+
             this.signup();
         },
 
@@ -206,31 +234,65 @@ export default {
             console.log(res)
             this.login()
           })
-          .catch(() => {
-            alert("회원가입에 문제가 발생했습니다")
+          .catch((err) => {
+            console.log(err.response)
+            if (err.response.data.data === 'Uid') { 
+              alert('중복된 아이디가 존재합니다')
+            }
+            else if (err.response.data.data === 'Email') {
+              alert('이미 가입된 이메일입니다')
+            }
+            else {
+              alert("회원가입에 문제가 발생했습니다")
+            }
             return
           });
         },
 
 
         login() {
-            const url = `${API_URL}account/login?uid=${this.userData.uid}&password=${this.userData.password}`;
-            console.log(url);
-            axios
-            .get(url)
-            .then(({data}) => {
-                console.log(data);
-                this.curUid = this.userData.uid;
-                this.$nextTick(() => {
-                this.$bvModal.hide('sign-up')
-                })
-                console.log('login_success');
-                this.$router.push('/')
-            })
-            .catch(() => {
-                alert("ID 또는 PASSWORD가 틀렸습니다");
-                return
-            });
+          const url = `${API_URL}account/login?uid=${this.userData.uid}&password=${this.userData.password}`;
+          console.log(url);
+          axios
+          .get(url)
+          .then(({data}) => {
+              console.log(data);
+              this.curUid = this.userData.uid;
+              this.$nextTick(() => {
+              this.$bvModal.hide('sign-up')
+              })
+              console.log('login_success');
+              this.$router.push('/')
+          })
+          .catch(() => {
+              alert("ID 또는 PASSWORD가 틀렸습니다")
+              return
+          });
+        },
+
+        emailAuth() {
+          const url = `${API_URL}account/email_auth?email=${this.userData.email}`
+          axios
+          .get(url)
+          .then(res => {
+            this.emailCode = res.data.data
+            return
+          })
+          .catch(() => {
+            alert('메일 전송에 실패했습니다')
+            return
+          })
+        },
+
+        codeChk() {
+          if (this.emailCodeInput === this.emailCode) {
+            this.emailAuthChk = true
+            alert('메일 인증되었습니다')
+          }
+          else {
+            alert('메일 인증 코드가 틀립니다')
+          }
+          return
         },
     }
 }

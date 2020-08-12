@@ -9,6 +9,8 @@ public interface UserDao extends JpaRepository<User, String> {
     
     //중복확인
     Optional<User> findByEmailOrUid(String email,String uid);
+    Optional<User> findByEmail(String email);
+    Optional<User> findByUid(String uid);
 
     // 조회
     User findUserByEmail(String email);

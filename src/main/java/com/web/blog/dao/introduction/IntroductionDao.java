@@ -11,7 +11,7 @@ public interface IntroductionDao extends JpaRepository<Introduction, String> {
     //c,u
     public Introduction save(Introduction newintro);
     //r
-    public Optional<Introduction> findByIntrono(int introno);
+    public Introduction findByIntrono(int introno);
     public List<Introduction> findByUid(String uid);
     public List<Introduction> findByStartdate(Date startdate);
     public List<Introduction> findByEnddate(Date enddate);
@@ -19,4 +19,5 @@ public interface IntroductionDao extends JpaRepository<Introduction, String> {
     public List<Introduction> findByCompany(String company);
     //d
     public Optional<Introduction> deleteByIntrono(int introno);
+
 }

@@ -3,7 +3,6 @@ package com.web.blog.controller.calender;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,53 +57,89 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 
 public class CalenderController {
     @Autowired CalenderDAO dao;
-    
+
     @PostMapping("/calender/create")
     @ApiOperation(value = "일정추가하기")
-    public void createCalender(@Valid @RequestBody CalenderRequest  request ){
-            Calender newCalender = new Calender(request.getUid(),request.getTitle(),request.getContent(),request.getStartdate(),request.getEnddate());
+    public Object createCalender(@Valid @RequestBody CalenderRequest request) {
+        Calender newCalender = new Calender(
+            request.getUid(),
+            request.getTitle(),
+            request.getContent(),
+            request.getStartdate(),
+            request.getEnddate()
+        );
 
-            dao.save(newCalender);
-
-    }
-    @GetMapping("/calender/{uid}")
-    @ApiOperation(value = "uid로일정가져오기")
-    public List<Calender> callCalender(@PathVariable String uid){
-            List<Calender> calenderList = dao.findByUid(uid);
-            return calenderList;
-    }
-    @PutMapping(value="/calender/{calenderno}")
-    @ApiOperation(value = "calender수정하기")
-    public Calender modifyCalender(@PathVariable int calenderno,@Valid @RequestBody CalenderRequest  request) {
-        
-        Calender newCalender = new Calender(calenderno,request.getUid(),request.getTitle(),request.getContent(),request.getStartdate(),request.getEnddate());
         dao.save(newCalender);
-        Calender cal = dao.findByCalenderno(calenderno);
-        return cal;
-    }    
-
-    @DeleteMapping("/calender/{calenderno}")
-    @ApiOperation("calender삭제하기")
-    public Object deleteCalender(@PathVariable int calenderno){
-
-        ResponseEntity response = null;
-
-        if(dao.findByCalenderno(calenderno)!=null){
-
         final BasicResponse result = new BasicResponse();
         result.status = true;
         result.data = "success";
-        dao.deleteByCalenderno(calenderno);
-        response = new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    @GetMapping("/calender/{uid}")
+    @ApiOperation(value = "uid로일정가져오기")
+    public Object callCalender(@PathVariable String uid) {
+        List<Calender> calenderList = dao.findByUid(uid);
+        if (!calenderList.isEmpty()) {
+            return new ResponseEntity<List<Calender>>(calenderList, HttpStatus.OK);
+        } else { 
+            final BasicResponse result = new BasicResponse();
+            result.status = false;
+            result.data = "notExist";
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
         }
-        else{
-            response = new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            
-        }
-        return response;
+    }
+    @PutMapping(value = "/calender/{calenderno}")
+    @ApiOperation(value = "calender수정하기")
+    public Object modifyCalender(
+        @PathVariable int calenderno,
+        @Valid @RequestBody CalenderRequest request
+    ) {
 
+        Calender newCalender = new Calender(
+            calenderno,
+            request.getUid(),
+            request.getTitle(),
+            request.getContent(),
+            request.getStartdate(),
+            request.getEnddate()
+        );
+        System.out.println(dao.findByCalenderno(calenderno));
+        if (dao.findByCalenderno(calenderno) != null) {
+            dao.save(newCalender);
+            Calender cal = dao.findByCalenderno(calenderno);
+            return new ResponseEntity<Calender>(cal, HttpStatus.OK);
+
+        } else {
+            final BasicResponse result = new BasicResponse();
+            result.status = false;
+            result.data = "notExist";
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+ 
+
+        }
     }
 
+    @DeleteMapping("/calender/{calenderno}")
+    @ApiOperation("calender삭제하기")
+    public Object deleteCalender(@PathVariable int calenderno) {
 
+        Calender calender = (Calender)dao.findByCalenderno(calenderno);
+        if (calender!= null) {
+
+            final BasicResponse result = new BasicResponse();
+            result.status = true;
+            result.data = "success";
+            //dao.deleteByCalenderno(calenderno);
+            dao.delete(calender);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } else {
+            final BasicResponse result = new BasicResponse();
+            result.status = false;
+            result.data = "notExist";
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+ 
+
+        }
+    }
 
 }

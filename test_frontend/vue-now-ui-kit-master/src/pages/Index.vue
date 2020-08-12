@@ -33,6 +33,7 @@
               <div class="row">
                 <div class="col-md-10 d-flex justify-content-end">
                   <BoardCreate/>
+                  <div v-if="!curUid"></div>
                 </div>
               </div>
             </div>
