@@ -7,9 +7,10 @@
         id="des-update-modal"
         ref="modal"
         title="Description"
+        @hidden="resetModal"
         hide-footer
         >
-        <form ref="form" @submit.stop.prevent="handleSubmit">
+        <form ref="form" @submit.stop.prevent="handleSubmit" accept-charset="utf-8">
             <b-form-group
                 label="소개"
                 label-for="name-input"
@@ -18,13 +19,12 @@
             <b-form-textarea
               id="textarea-state"
               v-model="userData.description"
-              :state="userData.description.length <= 500"
               placeholder="내 소개를 입력해주세요"
               rows="3"
             ></b-form-textarea>
             </b-form-group>
 
-            <b-button class="mt-3" block @click=handleSubmit>Update</b-button>
+            <b-button class="mt-3" block @click=handleSubmit>내 소개 변경</b-button>
         </form>
         </b-modal>
     </div>
@@ -35,13 +35,12 @@
 import axios from 'axios'
 import { sync } from 'vuex-pathify'
 
-const API_URL = 'http://localhost:8080/'
-
 export default {
     name: 'ProfileUpdate',
 
     data() {
       return {
+        API_URL: '',
         interests: [
           { text: '취업 관심 분야를 고르세요', value: '' },
           '서비스업',
@@ -55,16 +54,24 @@ export default {
           '건설업',
           '기관·협회',
         ],
+        tempDes: '',
       }
     },
     
     props: ['userData'],
 
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
     },
 
     methods: {
+        resetModal() {
+            this.userData.description = this.tempDes
+        },
+
         handleSubmit() {
 
             if (this.userData.description.length > 500) {
@@ -77,7 +84,7 @@ export default {
                 description: this.userData.description,
             }
             
-            const url = `${API_URL}account/update/description`
+            const url = `${this.API_URL}account/update/description`
 
             axios.put(url, putData)
             .then(res => {
@@ -86,6 +93,9 @@ export default {
                 })
 
                 console.log('description_update_success')
+                console.log('utf-8 확인')
+                console.log(putData.description)
+                this.tempDes = this.userData.description
                 location.reload()
                 alert('내 소개가 수정되었습니다')
             })
@@ -96,6 +106,16 @@ export default {
             
         },
     },
+    
+    mounted() {
+        this.tempDes = this.userData.description
+
+        if (this.isLocal){
+            this.API_URL = this.LocalURL
+        } else {
+            this.API_URL = this.DisURL
+        }
+    }
 }
 </script>
 

@@ -12,7 +12,7 @@
         @hidden="resetModal"
         hide-footer
         >
-        <form ref="form" @submit.stop.prevent="handleSubmit">
+        <form ref="form" @submit.stop.prevent="handleSubmit" accept-charset="utf-8">
             <b-form-group
                 label="ID"
                 label-for="uid-input"
@@ -113,7 +113,7 @@
               ></b-form-select>
             </b-form-group>
 
-            <b-button class="mt-3" block @click=handleSubmit>Signup</b-button>
+            <b-button class="mt-3" block @click=handleSubmit>회원가입</b-button>
         </form>
         </b-modal>
     </div>
@@ -124,12 +124,12 @@
 import axios from 'axios'
 import { sync } from 'vuex-pathify'
 
-const API_URL = 'http://localhost:8080/'
 
 export default {
     name: 'Signup',
     data() {
         return {
+            API_URL: '',
             emailCode: '',
             emailCodeInput: '',
             emailAuthChk: false,
@@ -164,7 +164,18 @@ export default {
     },
 
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
+    },
+
+    mounted() {
+        if (this.isLocal){
+            this.API_URL = this.LocalURL
+        } else {
+            this.API_URL = this.DisURL
+        }
     },
 
     methods: {
@@ -223,7 +234,7 @@ export default {
         },
 
         signup() {
-          const url = `${API_URL}account/join`
+          const url = `${this.API_URL}account/join`
           this.userData.password = this.password1
 
           console.log(this.userData)
@@ -251,7 +262,7 @@ export default {
 
 
         login() {
-          const url = `${API_URL}account/login?uid=${this.userData.uid}&password=${this.userData.password}`;
+          const url = `${this.API_URL}account/login?uid=${this.userData.uid}&password=${this.userData.password}`;
           console.log(url);
           axios
           .get(url)
@@ -271,7 +282,7 @@ export default {
         },
 
         emailAuth() {
-          const url = `${API_URL}account/email_auth?email=${this.userData.email}`
+          const url = `${this.API_URL}account/email_auth?email=${this.userData.email}`
           axios
           .get(url)
           .then(res => {

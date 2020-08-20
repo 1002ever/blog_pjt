@@ -8,12 +8,12 @@
         <b-modal
         id="modal-prevent-closing"
         ref="modal"
-        title="Login"
+        title="로그인"
         @show="resetModal"
         @hidden="resetModal"
         hide-footer
         >
-        <form ref="form" @submit.stop.prevent="handleSubmit">
+        <form ref="form" @submit.stop.prevent="handleSubmit" accept-charset="utf-8">
             <b-form-group
                 label="ID"
                 label-for="uid-input"
@@ -35,18 +35,15 @@
                 required
             ></b-form-input>
             </b-form-group>
-            <b-button class="mt-3" block @click=handleSubmit>Login</b-button>
+            <b-button class="mt-3" block @click=handleSubmit>로그인</b-button>
         </form>
         </b-modal>
     </div>
-
 </template>
 
 <script>
 import axios from 'axios'
 import { sync } from 'vuex-pathify'
-
-const API_URL = 'http://localhost:8080/'
 
 export default {
     name: 'Login',
@@ -54,11 +51,16 @@ export default {
         return {
             uid: '',
             password: '',
+
+            API_URL: '',
         }
     },
 
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
     },
 
     methods: {
@@ -80,7 +82,7 @@ export default {
             this.login();
         },
         login() {
-            const url = `${API_URL}account/login?uid=${this.uid}&password=${this.password}`;
+            const url = `${this.API_URL}account/login?uid=${this.uid}&password=${this.password}`;
             console.log(url);
             axios
             .get(url)
@@ -98,6 +100,14 @@ export default {
                 return
             });
         },
+    },
+
+    mounted() {
+        if (this.isLocal){
+            this.API_URL = this.LocalURL
+        } else {
+            this.API_URL = this.DisURL
+        }
     }
 }
 </script>

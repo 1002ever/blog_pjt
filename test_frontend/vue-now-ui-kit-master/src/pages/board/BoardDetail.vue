@@ -3,12 +3,12 @@
         <div class="page-header page-header-small">
             <parallax
                 class="page-header-image"
-                style="background-image: url('img/way1.jfif')"
+                style="background-image: url('img/bg23.jpg')"
             >
             </parallax>
             <div class="content-center">
                 <div class="container">
-                <h1 class="title">미남이의 블로그</h1>
+                <h1 class="title">{{username}}의 블로그</h1>
                 <div class="text-center"></div>
                 </div>
             </div>
@@ -16,36 +16,36 @@
         <div class="container">
             <div class="row mt-5">
                 <div class="col-md-12">
-                    <h2 class="d-flex justify-content-center">{{boardData.subject}}</h2>
+                    <h2 id="boardDetailSubject" class="d-flex justify-content-center">{{boardData.subject}}</h2>
                 </div>
             </div>
             <div class="container">
                 <div class="row">
                     <div class="col-md-8">
-                        <p class="d-inline text-muted">{{boardData.uid}}</p>
-                        <p class="d-inline text-muted ml-2">{{boardData.date}}</p>
+                        <h5 id="boardDetailUid" class="d-inline text-muted ">{{boardData.uid}}</h5>
+                        <h6 id="boardDetailDate" class="d-inline text-muted ml-2">{{boardData.updatedat}}</h6>
                     </div>
-                        <!-- <n-button type="primary" class="mt-0 mb-0 mr-2" round @click="BoardUpdate">수정</n-button> -->
                         <div class="col-md-4 d-flex justify-content-end">
                             <BoardUpdate class="d-inline-block" :boardData="boardData"/>
-                            <n-button type="primary" class="mt-0 mb-0 d-inline-block" round @click="BoardDelete" v-if="curUid===boardData.uid">삭제</n-button>
+                            <n-button type="primary" class="mt-0 mb-0 d-inline-block" round @click="deleteBoard" v-if="curUid===boardData.uid">삭제</n-button>
                         </div>
-                        <!-- <b-button type="primary" class="d-inline-block col-md-2 mt-0 mb-0 btn-primary btn-round" round @click="BoardDelete">삭제</b-button> -->
                     <hr>
                 </div>  
             </div>
             <div class="container">
                 <div class="row mt-md-3">
                     <div class="col-md-12">
-                        <p class="mt-md-2">
+                        <p class="mt-md-2 boardContent">
                             {{boardData.content}}
                         </p>
                         <br />
                         <br />
                 <div class="row">
                     <div class="col-md-6">
-                        <i class="now-ui-icons ui-2_favourite-28 text-danger p-1"></i>
-                        <p class="d-inline-block text-muted pr-3"> {{boardData.likes}}</p>
+                        <i id="heart" class="far fa-heart fa-lg" roll="button" @click="loginAlert" v-if="!curUid"></i>
+                        <i id="heart" class="fas fa-heart fa-lg" roll="button" @click="changeLike" v-if="curUid && like===true"></i>
+                        <i id="heart" class="far fa-heart fa-lg" roll="button" @click="changeLike" v-if="curUid && like===false"></i>
+                        <p class="d-inline-block text-muted pr-3 pl-2"> {{boardData.likes}}</p>
                         <p class="d-inline-block text-muted">댓글 {{commentNumber}}</p>
                     </div>
                 </div>        
@@ -55,8 +55,8 @@
             </div>
             <div class="container">
                 <h4 class="text-muted mt-lg-1">댓글</h4>
-                <commentList />
-                <commentInput/>
+                <commentList v-for="comment in comments" :key="comment.commentno" :comment="comment"/>
+                <commentInput @submitComment="getComment"/>
             </div>
 
         </div>
@@ -66,7 +66,6 @@
 
 <script>
 import axios from 'axios'
-const API_URL = 'http://localhost:8080/'
 import { sync } from 'vuex-pathify'
 
 import Button from '@/pages/board/Button.vue'
@@ -79,13 +78,18 @@ export default {
     data() {
         return {
             boardData: [],
-            commentNumber: 'commentNumber',
+            commentNumber: '',
+            like: null,
+            comments: [],
+            username: 'Jobis',
+
+            API_URL: '',
         }
     },
     methods: {
         getBoardData() {
             const boardno = this.$route.params.boardno
-            axios.get(`${API_URL}api/board/boardno/${boardno}/`)
+            axios.get(`${this.API_URL}api/board/boardno/${boardno}/`)
             .then(res=>{
                 this.boardData = res.data
             })
@@ -93,9 +97,9 @@ export default {
                 console.log(err)
             })
         },
-        BoardDelete() {
+        deleteBoard() {
             const boardno = this.$route.params.boardno
-            axios.delete(`${API_URL}api/board/${boardno}/`)
+            axios.delete(`${this.API_URL}api/board/${boardno}/`)
             .then(res => {
                 this.$router.push({name:'index'})
             })
@@ -103,12 +107,91 @@ export default {
                 console.log(err)
             })
         },
+        changeLike() {
+            const boardno = this.$route.params.boardno
+            const uid = this.curUid
+            axios.get(`${this.API_URL}api/board/like/${boardno}/${uid}/`)
+            .then(res =>{
+                if (res.data == 'cancle'){
+                    this.boardData.likes -= 1
+                    this.like = false
+                } else {
+                    this.boardData.likes += 1
+                    this.like = true
+                }
+                this.changeBoardLike()
+                
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        },
+        changeBoardLike() {
+                    const boardno = this.$route.params.boardno
+                    axios.put(`${this.API_URL}api/board/${boardno}/`, this.boardData.likes)
+                    .then(res => {
+                        console.log(this.boardData.likes)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+                },
+        checkLike() {
+            const boardno = this.$route.params.boardno
+            const uid = this.curUid
+            axios.get(`${this.API_URL}api/board/likeCheck/${boardno}/${uid}/`)
+            .then(res => {
+                this.like = res.data
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        },
+        getComment() {
+            const boardno = this.$route.params.boardno
+            axios.get(`${this.API_URL}comment/list/${boardno}/`)
+            .then(res => {
+                this.commentNumber = res.data.length
+                this.comments = res.data
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        },
+        getUserdata() {
+            var postData = {
+                uid: this.curUid,
+            }
+            axios.post(`${this.API_URL}account/userinfo/`, postData)
+            .then(res => {
+                this.username = res.data.name
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        },
+        loginAlert() {
+            alert('로그인 해주세요')
+        },
     },
     created() {
         this.getBoardData()
+        this.checkLike()
+        this.getComment()
+        this.getUserdata()
+    },
+    mounted() {
+        if (this.isLocal){
+        this.API_URL = this.LocalURL
+        } else {
+        this.API_URL = this.DisURL
+        }
     },
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
     },
     components: {
         BoardUpdate,
@@ -121,5 +204,24 @@ export default {
 </script>
 
 <style>
+#heart {
+    color:#ff3636;
+    cursor:pointer !important;
+}
 
+#boardDetailUid {
+    font-weight: bold;
+}
+
+#boardDetailDate {
+    font-weight: normal;
+}
+
+#boardDetailSubject {
+    font-weight: bold;
+}
+
+.boardContent {
+    white-space: pre-line;
+}
 </style>

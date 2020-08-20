@@ -5,30 +5,31 @@
 
         <b-modal id="modal-multi-1" size="lg" title="자소서 기본 사항" hide-footer no-stacking>
 
-            <form ref="form" @submit.stop.prevent="handleSubmit">
+            <form ref="form" @submit.stop.prevent="handleSubmit" accept-charset="utf-8">
 
-            <b-form-group
-                label="태그"
-                label-for="tag-input"
-            >
-            <b-form-input
-                id="tag-input"
-                v-model="hashTag.tagname"
-                required
-            ></b-form-input>
-            </b-form-group>
+            <label for="tags-pills">태그명</label>
+            <b-form-tags
+            input-id="tags-pills"
+            v-model="tagList"
+            tag-variant="primary"
+            tag-pills
+            size="lg"
+            separator=" "
+            placeholder="태그를 입력해주세요"
+            class="mb-2"
+            ></b-form-tags>
 
             <b-form-group
                 label="회사명"
                 label-for="company-input"
             >
             <b-form-input
+                type="text"
                 id="company-input"
                 v-model="introduction.company"
                 required
             ></b-form-input>
             </b-form-group>
-
 
             <b-form-group
                 label="채용 시작일"
@@ -57,7 +58,7 @@
             </b-form-group>
 
             <b-form-group
-                label="항복 번호"
+                label="항목 번호"
                 label-for="subjectno-input"
             >
             <b-form-input
@@ -85,7 +86,7 @@
             </div>
         </b-modal>
 
-        <b-modal id="modal-multi-2" size="lg" title="자소서 작성" hide-footer no-stacking>
+        <b-modal id="modal-multi-2" size="lg" title="자소서 작성하기" hide-footer no-stacking>
 
             <b-form-group
                 label="제목"
@@ -123,17 +124,21 @@
 import axios from 'axios'
 import {sync} from 'vuex-pathify'
 
-const API_URL = 'http://localhost:8080/'
 
 export default {
     name: 'IntroCreate',
 
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
     },
 
     data() {
         return {
+            API_URL: '',
+
             hashTag: {
                 tagname: ''
             },
@@ -147,7 +152,9 @@ export default {
                 subject: '',
                 contents: '',
                 limitlength: '',
-            }
+            },
+            
+            tagList: [],
         }
     },
     methods: {
@@ -173,7 +180,7 @@ export default {
         },
 
         nextModal() {
-            if (this.hashTag.tagname === '') {
+            if (this.tagList.length === 0) {
                 alert('태그를 입력해주세요')
                 return
             }
@@ -217,20 +224,24 @@ export default {
                 return
             }
 
-            const url = `${API_URL}introduction/create`
-            var postData = {
+            const url = `${this.API_URL}introduction/create?uid=${this.curUid}`
+
+            var hashTag = []
+            for(var i=0; i<this.tagList.length; i++) {
+                hashTag.push({tagname: this.tagList[i], uid: this.curUid,})
+            }
+        
+            var requestBody = {
                 introduction: this.introduction,
-                hashTag: this.hashTag,
+                hashTag: hashTag,
             }
 
-            console.log(postData)
-
-            axios.post(url, postData)
+            axios.post(url, requestBody)
             .then(res => {
-                console.log('출력물')
                 console.log(res)
                 this.$bvModal.hide('modal-multi-2')
                 location.reload()
+                alert('작성되었습니다')
             })
             .catch((err) => {
                 console.log(err)
@@ -246,6 +257,12 @@ export default {
 
     mounted() {
         this.introduction.uid = this.curUid
+
+        if (this.isLocal){
+            this.API_URL = this.LocalURL
+        } else {
+            this.API_URL = this.DisURL
+        }
         
     },
     

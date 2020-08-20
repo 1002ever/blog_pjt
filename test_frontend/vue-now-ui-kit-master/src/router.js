@@ -5,10 +5,10 @@ import MyHome from './pages/MyHome.vue';
 import Profile from './pages/Profile.vue';
 import MainNavbar from './layout/MainNavbar.vue';
 import MainFooter from './layout/MainFooter.vue';
-import MyBoard from './pages/MyBoard.vue';
+import Board from './pages/Board.vue';
 import MyIntroduction from './pages/myblog/MyIntroduction.vue';
+import HashTagging from './pages/introduction/HashTagging.vue';
 import BoardDetail from './pages/board/BoardDetail.vue';
-import MyIntroductionDetail from './pages/myblog/MyIntroductionDetail.vue';
 
 Vue.use(Router);
 const API_URL = 'http://localhost:8080/'
@@ -39,9 +39,9 @@ export default new Router({
       }
     },
     {
-      path: '/myboard',
-      name: 'myboard',
-      components: { default: MyBoard, header: MainNavbar },
+      path: '/board',
+      name: 'board',
+      components: { default: Board, header: MainNavbar },
       props: {
         header: { colorOnScroll: 400 },
         footer: { backgroundColor: 'black' }
@@ -51,6 +51,33 @@ export default new Router({
       path: '/introduction',
       name: 'introduction',
       components: { default: MyIntroduction, header: MainNavbar, footer: MainFooter },
+      props: {
+        header: { colorOnScroll: 400 },
+        footer: { backgroundColor: 'black' }
+      }
+    },
+    {
+      path: '/introduction/:page',
+      name: 'introductionPagination',
+      components: { default: MyIntroduction, header: MainNavbar, footer: MainFooter },
+      props: {
+        header: { colorOnScroll: 400 },
+        footer: { backgroundColor: 'black' }
+      }
+    },
+    {
+      path: '/hashtag/:tagno',
+      name: 'hashTagging',
+      components: { default: HashTagging, header: MainNavbar, footer: MainFooter },
+      props: {
+        header: { colorOnScroll: 400 },
+        footer: { backgroundColor: 'black' }
+      }
+    },
+    {
+      path: '/hashtag/:tagno/:page',
+      name: 'hashTaggingPagination',
+      components: { default: HashTagging, header: MainNavbar, footer: MainFooter },
       props: {
         header: { colorOnScroll: 400 },
         footer: { backgroundColor: 'black' }
@@ -83,19 +110,6 @@ export default new Router({
       }
 
     },
-    {
-      path: '/myboard/introduction/introno',
-      // path: '/board/:id' 추후에 이걸로 수정필요,
-      name: 'MyIntroductionDetail',
-      components: { default: MyIntroductionDetail, header: MainNavbar, footer: MainFooter},
-      props: {
-        header: { colorOnScroll: 400 },
-        footer: { backgroundColor: 'black' }
-      }
-
-    },
-
-   
   ],
   scrollBehavior: to => {
     if (to.hash) {

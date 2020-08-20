@@ -37,7 +37,7 @@
       </li>
 
       <li class="nav-item" v-if="curUid">
-        <nav-link class="nav-link" to="/">
+        <nav-link class="nav-link" to="/board">
           <p class="text-white">게시판</p>
         </nav-link>
       </li>
@@ -84,13 +84,30 @@ import { Popover } from 'element-ui';
 import { sync } from 'vuex-pathify'
 import axios from 'axios'
 
-const API_URL = 'http://localhost:8080/'
-
 export default {
   name: 'main-navbar',
-  computed: {
-      curUid: sync('curUid')
+
+  data() {
+    return {
+      API_URL: '',
+    }
   },
+
+  computed: {
+      curUid: sync('curUid'),
+      DisURL: sync('DisURL'),
+      LocalURL: sync('LocalURL'),
+      isLocal: sync('isLocal'),
+  },
+
+  mounted() {
+      if (this.isLocal){
+          this.API_URL = this.LocalURL
+      } else {
+          this.API_URL = this.DisURL
+      }
+  },
+
   props: {
     transparent: Boolean,
     colorOnScroll: Number
@@ -105,7 +122,7 @@ export default {
   },
   methods: {
     logout() {
-      const url = `${API_URL}account/logout`;
+      const url = `${this.API_URL}account/logout`;
         axios
         .get(url)
         .then(({data}) => {

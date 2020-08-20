@@ -9,3 +9,5 @@
 <script>
 export default {};
 </script>
+
+<style src="vuelendar/scss/vuelendar.scss" lang="scss"></style>

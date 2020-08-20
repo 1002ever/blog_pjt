@@ -33,7 +33,6 @@ import java.util.List;
 public class Introduction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private int introno;
     
     @NonNull String uid;

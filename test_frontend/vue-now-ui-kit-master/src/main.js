@@ -37,7 +37,10 @@ Vue.use(Vuex);
 Vue.use(BootstrapVue);
 
 const state = {
+  isLocal: true,
   curUid: '',
+  DisURL: 'http://i3c104.p.ssafy.io:8080/',
+  LocalURL: 'http://localhost:8080/',
 };
 
 const mutations = make.mutations(state);

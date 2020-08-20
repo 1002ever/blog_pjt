@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.web.blog.model.BasicResponse;
 import com.web.blog.model.board.Board;
+import com.web.blog.model.board.Userlike;
 import com.web.blog.service.BoardService;
 
 import org.json.HTTP;
@@ -32,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
         @ApiResponse(code = 404, message = "Not Found", response = BasicResponse.class),
         @ApiResponse(code = 500, message = "Failure", response = BasicResponse.class) })
 
-@CrossOrigin(origins = { "http://localhost:3000" })
+@CrossOrigin(origins = { "http://i3c104.p.ssafy.io:3000", "http://localhost:3000", "http://localhost:8081" })
 @RestController
 @RequestMapping("/api/board")
 public class BoardController {
@@ -106,10 +107,10 @@ public class BoardController {
         Optional<Board> isDeleted = boardService.deleteBoard(boardno);
         System.out.println("delete board ......");
 
-        if(isDeleted.isEmpty())
+        if(isDeleted == null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(HttpStatus.OK);
     }
     
     @ApiOperation(value = "새로운 게시글을 생성한다.", response = String.class)
@@ -173,4 +174,19 @@ public class BoardController {
         }
     }
    
+
+    @ApiOperation(value = "게시글 좋아요 여부")
+    @GetMapping("/likeCheck/{boardno}/{uid}")
+    public ResponseEntity<Boolean> likeList(@PathVariable int boardno, @PathVariable String uid) {
+        System.out.println(boardno +" 좋아요 여부 확인");
+        try {
+            boolean inLikeList = boardService.likeCheck(boardno, uid);
+            if(inLikeList)
+                return new ResponseEntity<Boolean>(true , HttpStatus.OK);
+            return new ResponseEntity<Boolean>(false , HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

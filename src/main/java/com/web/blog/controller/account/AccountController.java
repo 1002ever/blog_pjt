@@ -45,9 +45,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
     @ApiResponse(code = 500, message = "Failure", response = BasicResponse.class)
 })
 
-@CrossOrigin(origins = {
-    "http://localhost:3000"
-})
+@CrossOrigin(origins = { "http://i3c104.p.ssafy.io:3000", "http://localhost:3000", "http://localhost:8081" })
 @RestController
 public class AccountController {
 

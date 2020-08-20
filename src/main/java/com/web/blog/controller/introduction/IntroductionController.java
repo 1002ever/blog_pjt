@@ -1,6 +1,7 @@
 package com.web.blog.controller.introduction;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import com.web.blog.model.introduction.HashTag;
 import com.web.blog.model.introduction.Introduction;
 import com.web.blog.model.introduction.Tagging;
 import com.web.blog.model.introduction.WriteRequest;
+import com.web.blog.model.user.UserInfoRequest;
 
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,13 +33,14 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @ApiResponses(value = { @ApiResponse(code = 401, message = "Unauthorized", response = BasicResponse.class),
         @ApiResponse(code = 403, message = "Forbidden", response = BasicResponse.class),
         @ApiResponse(code = 404, message = "Not Found", response = BasicResponse.class),
         @ApiResponse(code = 500, message = "Failure", response = BasicResponse.class) })
 
-@CrossOrigin(origins = { "http://localhost:3000" })
+@CrossOrigin(origins = { "http://i3c104.p.ssafy.io:3000", "http://localhost:3000", "http://localhost:8081" })
 @RestController
 public class IntroductionController {
 
@@ -47,14 +50,13 @@ public class IntroductionController {
     @Autowired
     HashTagDao tagDao;
 
-
     // 1. 자소서 작성
     @PostMapping("/introduction/create")
     @ApiOperation(value = "자소서작성")
-    public Object createIntro(@Valid @RequestBody WriteRequest request) {
+    public Object createIntro(@RequestParam(required = true) String uid, @Valid @RequestBody WriteRequest request) {
         ResponseEntity response = null;
 
-        store(request);
+        store(request, uid);
 
         final BasicResponse result = new BasicResponse();
         result.status = true;
@@ -67,49 +69,70 @@ public class IntroductionController {
 
     // 자소서 & 해시태그 동시 저장
     @Transactional
-    public void store(WriteRequest data) {
+    public int store(WriteRequest data, String uid) {
         Introduction newIntro = data.getIntroduction();
-        HashTag newTag = data.getHashTag();
-        newTag.setCnt(1);
-        System.out.println(newTag.toString());
+        List<HashTag> newTags = data.getHashTag();
 
-        // 이미 등록되어 있는 해시태그 들어오면, count +1
-        HashTag oldTag = tagDao.findHashtagByTagname(newTag.getTagname());
-        if (oldTag != null) {
-            oldTag.setCnt(oldTag.getCnt() + 1);
-            newTag = oldTag;
+        for (HashTag tag : newTags) {
+            Tagging newTagging = new Tagging();
+            tag.setCnt(1);
+
+            // 이미 등록되어 있는 해시태그랑 uid 들어오면
+            HashTag oldTag = tagDao.findHashtagByTagnameAndUid(tag.getTagname(), uid);
+            if (oldTag != null) {
+                // 카운트 올리기
+                oldTag.setCnt(oldTag.getCnt() + 1);
+                tag = oldTag;
+                System.out.println("이미 있어! 이 uid랑 해시태그!");
+            }
+
+            Introduction tmp = introDao.findByIntrono(newIntro.getIntrono());
+            newTagging.setIntroduction(newIntro);
+            newTagging.setHashtag(tag);
+            newIntro.addTagging(newTagging);
+            tagDao.save(tag);
+            introDao.save(newIntro);
         }
 
-        Tagging newTagging = new Tagging();
-        newTagging.setIntroduction(newIntro);
-        newTagging.setHashtag(newTag);
-        newIntro.addTagging(newTagging);
-        
-        tagDao.save(newTag);
-        introDao.save(newIntro);
+        return (newIntro.getIntrono());
     }
-
 
     // 2. 자소서 수정
     // 2.2 변경된 내용을 찾아서 자소서 수정을 저장하는 부분
-    @PutMapping("/introduction/{introno}")
+    @PutMapping("/introduction/{introno}/{uid}")
     @ApiOperation(value = "자소서수정")
-    public Object updateIntro(@PathVariable int introno, @Valid @RequestBody WriteRequest request) {
-        ResponseEntity response = null;
-        Introduction intro = request.getIntroduction();
-        HashTag tag = request.getHashTag();
+    public Object updateIntro(@PathVariable int introno, @Valid @RequestBody WriteRequest request, @PathVariable String uid) {
 
-        intro.setIntrono(introno);
-        introDao.save(intro);
+        // 설정되어있는 관계부터 삭제해야한다
+        // cascade 되어있기 때문에 자소서 삭제하면 관계 테이블도 같이 삭제
+        // 해시태그 count는 같이 안줄어들기 때문에 직접 해줘야한다.
+        Introduction introTmp = introDao.findByIntrono(introno);
+        
+        List<HashTag> tagsTmp = new ArrayList<>();
 
-        // 해시태그 수정해야함.....
-        final BasicResponse result = new BasicResponse();
-        result.status = true;
-        result.data = "success";
+        for(int i = 0;i < introTmp.getTaggings().size();i++){
+            tagsTmp.add(introTmp.getTaggings().get(i).getHashtag());
+            for(HashTag tags : tagsTmp){
+                if(tags.getCnt() > 0){
+                    tags.setCnt(tags.getCnt() -1);
+                }
+                tagDao.save(tags);
+            }
+        }
 
-        response = new ResponseEntity<>(result, HttpStatus.OK);
+        introDao.deleteByIntrono(introno);
 
-        return response;
+        // 새로운 관계 설정
+        int resNo = store(request, uid);
+
+        Introduction introT = introDao.findByIntrono(resNo);
+        List<HashTag> tagT = new ArrayList<>();
+        for(int i = 0;i<introT.getTaggings().size();i++){
+            tagT.add(introT.getTaggings().get(i).getHashtag());
+        }
+
+        WriteRequest result = new WriteRequest(introT, tagT);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // 3. 자소서 삭제
@@ -118,8 +141,20 @@ public class IntroductionController {
     public Object deleteIntro(@PathVariable int introno) {
         ResponseEntity response = null;
 
-        introDao.deleteByIntrono(introno);
+        Introduction introTmp = introDao.findByIntrono(introno);
+        List<HashTag> tagsTmp = new ArrayList<>();
 
+        for(int i = 0;i < introTmp.getTaggings().size();i++){
+            tagsTmp.add(introTmp.getTaggings().get(i).getHashtag());
+            for(HashTag tags : tagsTmp){
+                if(tags.getCnt() > 0){
+                    tags.setCnt(tags.getCnt() -1);
+                }
+                tagDao.save(tags);
+            }
+        }
+      
+       introDao.deleteByIntrono(introno);
         final BasicResponse result = new BasicResponse();
         result.status = true;
         result.data = "success";
@@ -130,21 +165,59 @@ public class IntroductionController {
 
     }
 
-    // 4. 자소서 불러오기(하나만 불러오기)
+    // 4. 자소서 & 해시태그 불러오기(하나만 불러오기)
     @GetMapping("/introduction/{introno}")
-    @ApiOperation(value = "introno로자소서보기")
-    public Object callIntro(@PathVariable int introno) {
+    @ApiOperation(value = "introno로 자소서 상세조회")
+    public ResponseEntity<WriteRequest> callIntro(@PathVariable int introno) {
         Introduction intro = introDao.findByIntrono(introno);
-        return intro;
+        List<HashTag> tag = new ArrayList<>();
+
+        for(int i = 0;i<intro.getTaggings().size();i++){
+            tag.add(intro.getTaggings().get(i).getHashtag());
+        }
+
+        WriteRequest result = new WriteRequest(intro, tag);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    // 내 자소서 다 불러오기
+    @GetMapping("/introduction/uid/{uid}")
+    @ApiOperation(value = "uid로 자소서보기")
+    public ResponseEntity<List<WriteRequest>> callIntrobyUid(@PathVariable String uid) {
+        List<Introduction> list = introDao.findByUid(uid);
+
+        List<WriteRequest> result = new ArrayList<>();
+        
+        for(Introduction intro : list){
+            List<HashTag> tagTmp = new ArrayList<>();
+            for(int i = 0;i<intro.getTaggings().size();i++){
+                tagTmp.add(intro.getTaggings().get(i).getHashtag());
+            }
+            result.add(new WriteRequest(intro, tagTmp));
+        }
+
+        return new ResponseEntity<List<WriteRequest>>(result, HttpStatus.OK);
 
     }
 
-    @GetMapping("/introduction/uid/{uid}")
-    @ApiOperation(value = "uid로자소서보기")
-    public ResponseEntity<List<Introduction>> callIntrobyUid(@PathVariable String uid) {
-        List<Introduction> list = introDao.findByUid(uid);
+    // 같은 회사인 애들 다 가져와야함(같은회사고 같은 유저가 쓴거)
+    @PostMapping("/introduction/company")
+    @ApiOperation(value = "company로 자소서보기")
+    public ResponseEntity<List<WriteRequest>> callIntrobyCompany(@RequestParam(required = true) String company,
+            @RequestBody UserInfoRequest request) {
+        String uid = request.getUid();
+        List<Introduction> list = introDao.findByCompanyAndUid(company, uid);
+        List<WriteRequest> result = new ArrayList<>();
+        
+        for(Introduction intro : list){
+            List<HashTag> tagTmp = new ArrayList<>();
+            for(int i = 0;i<intro.getTaggings().size();i++){
+                tagTmp.add(intro.getTaggings().get(i).getHashtag());
+            }
+            result.add(new WriteRequest(intro, tagTmp));
+        }
 
-        return new ResponseEntity<List<Introduction>>(list, HttpStatus.OK);
+        return new ResponseEntity<List<WriteRequest>>(result, HttpStatus.OK);
 
     }
 
@@ -160,14 +233,6 @@ public class IntroductionController {
     @ApiOperation(value = "enddate로자소서보기")
     public ResponseEntity<List<Introduction>> callIntrobyEnddate(@PathVariable Date enddate) {
         List<Introduction> list = introDao.findByEnddate(enddate);
-        return new ResponseEntity<List<Introduction>>(list, HttpStatus.OK);
-
-    }
-
-    @GetMapping("/introduction/company/{company}")
-    @ApiOperation(value = "company로자소서보기")
-    public ResponseEntity<List<Introduction>> callIntrobyCompany(@PathVariable String company) {
-        List<Introduction> list = introDao.findByCompany(company);
         return new ResponseEntity<List<Introduction>>(list, HttpStatus.OK);
 
     }

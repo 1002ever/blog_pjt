@@ -109,4 +109,13 @@ public class BoardService {
         return clicked;
     }
 
+    //좋아요여부 확인
+    public boolean likeCheck(int boardno, String uid) throws Exception {
+        List<Userlike> userlikeList = userlikeDao.findByBoardnoAndUid(boardno, uid);
+        if(userlikeList.isEmpty())
+            return false;
+        return true;
+    }
+
+
 }

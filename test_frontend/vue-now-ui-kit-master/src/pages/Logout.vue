@@ -8,16 +8,37 @@
 import axios from 'axios'
 import { sync } from 'vuex-pathify'
 
-const API_URL = 'http://localhost:8080/'
-
 export default {
     name: 'Logout',
+
+    data() {
+        return {
+            API_URL: '',
+        }
+    },
+
+    computed: {
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
+    },
+
+    mounted() {
+        if (this.isLocal){
+            this.API_URL = this.LocalURL
+        } else {
+            this.API_URL = this.DisURL
+        }
+    },
+
     methods: {
         logout() {
-            const url = `${API_URL}account/logout`;
+            const url = `${this.API_URL}account/logout`;
             axios
             .get(url)
             .then(({data}) => {
+                console.log('???????????????')
                 console.log(data);
                 this.curUid = ''
                 console.log('logout success')
@@ -31,9 +52,6 @@ export default {
         },
     },
 
-    computed: {
-        curUid: sync('curUid')
-    },
 }
 
 </script>

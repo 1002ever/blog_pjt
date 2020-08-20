@@ -34,12 +34,15 @@ public class HashTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @Column(name = "tagno")
     private int tagno;
 
+    @Column(name = "uid")
+    @NonNull String uid;
+
     @Column(name = "tagname")
     @NonNull String tagname;
+    
     @JsonIgnore
     @Column(name= "cnt")
     @NonNull int cnt;

@@ -9,7 +9,7 @@
         title="Profile"
         hide-footer
         >
-        <form ref="form" @submit.stop.prevent="handleSubmit">
+        <form ref="form" @submit.stop.prevent="handleSubmit" accept-charset="utf-8">
             <b-form-group
                 label="NICKNAME"
                 label-for="name-input"
@@ -52,7 +52,7 @@
             </b-form-group>
 
 
-            <b-button class="mt-3" block @click=handleSubmit>Update</b-button>
+            <b-button class="mt-3" block @click=handleSubmit>내 정보 변경</b-button>
         </form>
         </b-modal>
     </div>
@@ -63,13 +63,13 @@
 import axios from 'axios'
 import { sync } from 'vuex-pathify'
 
-const API_URL = 'http://localhost:8080/'
 
 export default {
     name: 'ProfileUpdate',
 
     data() {
       return {
+        API_URL: '',
         interests: [
           { text: '취업 관심 분야를 고르세요', value: '' },
           '서비스업',
@@ -89,7 +89,10 @@ export default {
     props: ['userData'],
 
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
     },
 
     methods: {
@@ -114,7 +117,7 @@ export default {
 
             console.log(putData)
             
-            const url = `${API_URL}account/update`
+            const url = `${this.API_URL}account/update`
 
             axios.put(url, putData)
             .then(res => {
@@ -132,6 +135,14 @@ export default {
             })
             
         },
+    },
+
+    mounted() {
+        if (this.isLocal){
+            this.API_URL = this.LocalURL
+        } else {
+            this.API_URL = this.DisURL
+        }
     }
 }
 </script>

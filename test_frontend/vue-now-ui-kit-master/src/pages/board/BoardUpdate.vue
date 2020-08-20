@@ -2,15 +2,15 @@
   <div>
     <b-button v-b-modal.modal-2 class="btn-primary btn-round mt-0 mb-0 mr-1" v-if="curUid===boardData.uid">수정</b-button>
 
-    <b-modal id="modal-2" title="Community 글쓰기" size="lg" hide-footer>
+    <b-modal id="modal-2" title="Community 글쓰기" size="lg" hide-footer @hidden="backward">
     <hr class="mt-0">
     <div class="pt-0">
         <form class="container">
             <div class="row">
-                <input type="text" class="col-md-12 mb-md-2" id="title" v-model="boardData.subject">              
+                <input type="text" class="col-md-12 mb-md-2" id="title" v-model="boardSubject">              
             </div>
             <div class="row">
-                <textarea class="col-md-12 mb-md-1"  cols="30" rows="10" style="resize:none;" v-model="boardData.content"></textarea>
+                <textarea class="col-md-12 mb-md-1 boardTextarea" cols="30" rows="10" v-model="boardContent"></textarea>
             </div>
             <div class="row d-flex justify-content-center">
                 <b-button @click="BoardUpdate" class="btn-primary btn-round col-md-8 m-md-1">수정</b-button>
@@ -23,20 +23,29 @@
 
 <script>
 import axios from 'axios'
-const API_URL = 'http://localhost:8080/'
 import { sync } from 'vuex-pathify'
 
 export default {
     name: 'BoardUpdate',
     props: {
         boardData: {
-            type: Array,
+            type: Object
+        }
+    },
+    data() {
+        return {
+            boardSubject: '',
+            boardContent: '',
+
+            API_URL: '',
         }
     },
     methods: {
         BoardUpdate() {
             const boardno = this.$route.params.boardno
-            axios.put(`${API_URL}api/board/${boardno}/`, this.boardData)
+            this.boardData.subject = this.boardSubject
+            this.boardData.content = this.boardContent
+            axios.put(`${this.API_URL}api/board/${boardno}/`, this.boardData)
             .then(res => {
                 this.$bvModal.hide('modal-2')
             })
@@ -44,16 +53,35 @@ export default {
                 console.log(err)
             })
         },
-        hidemodal() {
-
-        }
+        backward() {
+            this.boardSubject = this.boardData.subject
+            this.boardContent = this.boardData.content
+        },
     },
     computed: {
-        curUid: sync('curUid')
+        curUid: sync('curUid'),
+        DisURL: sync('DisURL'),
+        LocalURL: sync('LocalURL'),
+        isLocal: sync('isLocal'),
+    },
+    mounted() {
+        if (this.isLocal){
+        this.API_URL = this.LocalURL
+        } else {
+        this.API_URL = this.DisURL
+        }
+    },
+    watch: {
+      boardData: function(newBoard) {
+        this.boardSubject = newBoard.subject
+        this.boardContent = newBoard.content
+      },
     },
 }
 </script>
 
 <style>
-
+.boardTextarea {
+    resize: none;
+}
 </style>
