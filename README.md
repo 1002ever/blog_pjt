@@ -6,16 +6,38 @@
 
 ## :pencil2: 서비스 소개
 
-*  **'#' 기능으로 항목별 자소서 관리**
-   * Ex) 지원동기, 장단점
-*  **나만의 채용 공고**
-   * 타임 테이블
-   * 채용 진행 상황
+* **해시태그(#)로 자소서 문항별 관리**
 
-*  **카테고리별 최신 뉴스**
-   * Ex) 산업별
-*  **간단한 한 줄 메모**
-   * Ex) 유튜브 자소서 꿀팁 영상 링크
+  ex) 장점/단점/지원동기 등으로 **필터링**
+
+  * **회사별** 자소서 관리도 가능!
+
+* **나만의 채용 공고**
+
+  * 나의 관심 분야에 따른 채용 공고 추천
+  * Drag and Drop을 통한 채용 진행중인 기업 관리
+
+* **공용 게시판을 통한 커뮤니티 형성**
+
+<br>
+
+#### :pencil: Live Demo
+
+in here http://i3c104.p.ssafy.io:8080/#/
+
+<br>
+
+
+
+## :pencil2: 왜 JOBIS 일까?​ 
+
+### "JOB + IS(있으!)"
+
+```
+JOBIS와 함께라면 내 JOB은 따논 당상!
+
+JOBIS로 자기소개서 작성 시간을 단축시키고, 더 많은 기업에 지원해서 합격률을 높여보세요!!
+```
 
 <br>
 
@@ -43,7 +65,7 @@
 
 ## :pencil2: 사용 API
 
-* 추가예정
+* **사람인 오픈 API** http://api.saramin.co.kr/documents/ 
 
 <br>
 
@@ -51,8 +73,6 @@
 
 ![front](https://user-images.githubusercontent.com/19389288/90724580-c2bb2480-e2f9-11ea-8a45-1dd565dce45f.PNG)
 ![back](https://user-images.githubusercontent.com/19389288/90724593-c484e800-e2f9-11ea-884e-1feb30a98363.PNG)
-
-
 
 
 

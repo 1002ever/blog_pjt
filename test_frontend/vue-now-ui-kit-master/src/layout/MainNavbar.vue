@@ -10,7 +10,7 @@
       <router-link v-popover:popover1 class="navbar-brand" to="/">
         <p>Jobis</p>
       </router-link>
-      <el-popover
+      <!-- <el-popover
         ref="popover1"
         popper-class="popover"
         placement="bottom"
@@ -20,7 +20,7 @@
         <div class="popover-body">
           Designed by Invision. Coded by Creative Tim
         </div>
-      </el-popover>
+      </el-popover> -->
     </template>
     <template slot="navbar-menu">
 

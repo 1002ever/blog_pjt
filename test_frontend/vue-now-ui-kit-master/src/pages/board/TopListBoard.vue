@@ -1,14 +1,14 @@
 <template>
   <div class="container">
-    <div class="row mb-md-1">
+    <div class="row mb-md-3">
       <div class="col-md-12 pl-0 d-flex justify-content-between">
           <h2 id="boardSubject" class="d-inline-block mb-sm-1" @click="boardDetailPush" role="button">{{topBoard.subject}}</h2>
           <h5 id="boardUid" class="d-inline-block mb-0">{{topBoard.uid}}</h5>
       </div>
     </div>
     <div class="row mt-md-1">
-      <div class="col-md-12 pl-0">
-        <p class="text-muted d-flex justify-content-start" @click="boardDetailPush" role="button">
+      <div class="col-md-12 pl-0 d-flex justify-content-start">
+        <p id="board-ellipsis2" class="text-muted" @click="boardDetailPush" role="button">
           {{topBoard.content}}
         </p>
       </div>
@@ -80,8 +80,30 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #heartMainBoard {
     color:#ff3636;
+}
+
+#boardUid {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+#boardSubject {
+    font-weight: bold;
+}
+
+#board-ellipsis2 {
+  width: 100%;
+  white-space: pre-line; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2; 
+  height: 2.4em; 
+  text-align: left; 
+  word-wrap: break-word; 
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical;
 }
 </style>

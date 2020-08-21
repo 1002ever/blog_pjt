@@ -331,7 +331,7 @@ export default {
       this.userData = res.data
       
       if (this.userData.img !== "") {
-        this.imgPath = userData.img
+        this.imgPath = this.userData.img
       }
       if (this.userData.description !== "") {
         this.description = this.userData.description

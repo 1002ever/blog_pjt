@@ -2,46 +2,46 @@
     <div class="container">
         <div class="row w-100">
             <div class="col-4" @drop="drop" @dragover="allowDrop" data-type="started">
-                <div class="mt-5 align-center">제출전</div>
+                <div class="mt-5 align-center">제출 전</div>
                 <div
                     class="border mt-3 margin-center"
                     v-for="start in started"
                     :key="start.timelineno"
                     data-type="started"
+                    :data-index="start.timelineno"
                     draggable="true"
                     @dragstart="dragStart">{{start.tlname}}</div>
             </div>
 
             <div class="col-4" @drop="drop" @dragover="allowDrop" data-type="proceed">
-                <div class="mt-5 align-center">진행중</div>
+                <div class="mt-5 align-center">진행 중</div>
                 <div
                     class="border mt-3 margin-center"
                     v-for="pro in proceed"
                     :key="pro.timelineno"
                     data-type="proceed"
+                    :data-index="pro.timelineno"
                     draggable="true"
                     @dragstart="dragStart">{{pro.tlname}}</div>
             </div>
 
             <div class="col-4" @drop="drop" @dragover="allowDrop" data-type="finished">
-                <div class="mt-5 align-center">제출완료</div>
+                <div class="mt-5 align-center">제출 완료</div>
                 <div
                     class="border mt-3 margin-center"
                     v-for="finish in finished"
                     :key="finish.timelineno"
                     data-type="finished"
+                    :data-index="finish.timelineno"
                     draggable="true"
                     @dragstart="dragStart">{{finish.tlname}}</div>
             </div>
         </div>
-        <!-- Using components -->
-        <div class="row align-items-center">
-            <b-input-group prepend="회사추가" class="mt-3">
-                <b-form-input class="inputform" v-model="inputTl"></b-form-input>
-                <b-input-group-append>
-                    <b-button variant="info" @click="updateRequest">Add</b-button>
-                </b-input-group-append>
-            </b-input-group>
+        <div class="container">
+            <div class="row mt-3 mb-3">
+                <b-form-input class="d-inline-block col-md-10 mr-2 mt-1 mb-1" size="lg" v-model="inputTl" placeholder="자소서를 작성할 회사명을 입력해주세요"></b-form-input>
+                <b-button class="d-inline-block btn-primary btn-round col-1 m-0" @click="updateRequest">추가</b-button>
+            </div>
         </div>
     </div>
 </template>
@@ -58,12 +58,31 @@
         },
         methods: {
             dragStart(event) {
+                // 드래그한 곳에서의 배열을 전달
                 event
                     .dataTransfer
                     .setData("fromarray", event.target.dataset.type);
+
+                // 해당 배열 인덱스를 저장 및 전달
+                var curArray = ''
+                if (event.target.dataset.type === "started") {
+                    curArray = this.started
+                } else if (event.target.dataset.type === "proceed") {
+                    curArray = this.proceed
+                } else {
+                    curArray = this.finished
+                }
+
+                var curIdx = -1
+                for (var i=0; i<curArray.length; i++) {
+                    if (curArray[i].timelineno === Number(event.target.dataset.index)) {
+                        curIdx = i
+                        break
+                    }
+                }
                 event
                     .dataTransfer
-                    .setData("fromindex", event.target.dataset.index);
+                    .setData("fromindex", curIdx);
             },
             allowDrop(event) {
                 event.preventDefault();
@@ -73,13 +92,49 @@
                 var fromarray = event
                     .dataTransfer
                     .getData("fromarray");
-                var fromindex = event
+                var fromindex = Number(event
                     .dataTransfer
-                    .getData("fromindex");
+                    .getData("fromindex"));
+
                 var removed = this[fromarray].splice(fromindex, 1);
                 var toarray = event.target.dataset.type;
                 this[toarray].push(removed[0]);
+
+                const url = `${this.API_URL}timeline/${removed[0].timelineno}`
+
+                var curTltype = event.target.dataset.type
+                if (curTltype !== fromarray) {
+                    if (curTltype === "started") {
+                        curTltype = 0
+                    } else if (curTltype === "proceed") {
+                        curTltype = 1
+                    } else {
+                        curTltype = 2
+                    }
+
+                    var requestBody = {
+                        tlname: removed[0].tlname,
+                        tltype: curTltype,
+                        uid: this.curUid
+                    }
+
+                    console.log(url)
+                    console.log(requestBody)
+                    
+                    axios
+                        .put(url, requestBody)
+                        .then(res => {
+                            console.log(res)
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            alert('타임라인을 변경하지 못했습니다')
+                            return
+                        })
+                }
+                
             },
+
             callTimelineType0() {
                 var url = `${this
                     .API_URL}/timeline/type/${this
@@ -144,11 +199,10 @@
                         console.log(res)
                         this.inputTl = ''
                         location.reload()
-                        alert('작성되었습니다')
                     })
                     .catch((err) => {
                         console.log(err)
-                        alert('저장하지 못했습니다')
+                        alert('일정을 추가하지 못했습니다')
                         return
                     })
                     this.callTimelineType0()
